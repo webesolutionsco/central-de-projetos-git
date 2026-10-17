@@ -6,50 +6,57 @@ use Illuminate\Support\Facades\Crypt;
 use RuntimeException;
 
 /**
- * Keeps the optional GitHub token outside the public directory. The token is
- * encrypted with Laravel's APP_KEY and is never returned by the HTTP API.
+ * Stores GitHub credentials encrypted and scoped to a single HTTPS repository.
+ * A previous single-token installation is detected for migration guidance, but
+ * is never used for another repository.
  */
 class GitHubCredentialStore
 {
-    public function status(): array
+    /** @return array{configured: bool, scope: ?string, source: string} */
+    public function statusForOrigin(?string $origin): array
     {
-        return ['configured' => is_file($this->path())];
+        $scope = $this->scopeFromOrigin($origin ?? '');
+        if ($scope === null) {
+            return ['configured' => false, 'scope' => null, 'source' => 'none'];
+        }
+
+        if (array_key_exists($scope, $this->tokens())) {
+            return ['configured' => true, 'scope' => $scope, 'source' => 'repository'];
+        }
+
+        $legacyConfigured = $this->legacyToken() !== null;
+
+        return ['configured' => $legacyConfigured, 'scope' => $scope, 'source' => $legacyConfigured ? 'legacy' : 'none'];
     }
 
-    public function save(string $token): void
+    public function saveForOrigin(string $origin, string $token): void
     {
-        $token = trim($token);
-        if (! preg_match('/^[A-Za-z0-9_-]{20,500}$/', $token)) {
-            throw new RuntimeException('Informe um token do GitHub válido. Ele deve ter entre 20 e 500 caracteres, sem espaços.');
-        }
+        $scope = $this->requiredScope($origin);
+        $this->validateToken($token);
 
-        $directory = dirname($this->path());
-        if (! is_dir($directory) && ! mkdir($directory, 0700, true) && ! is_dir($directory)) {
-            throw new RuntimeException('Não foi possível preparar o armazenamento seguro da credencial.');
-        }
-
-        $temporary = $this->path().'.tmp';
-        $written = file_put_contents($temporary, Crypt::encryptString($token), LOCK_EX);
-        if ($written === false || ! rename($temporary, $this->path())) {
-            @unlink($temporary);
-            throw new RuntimeException('Não foi possível salvar a credencial do GitHub.');
-        }
+        $tokens = $this->tokens();
+        $tokens[$scope] = trim($token);
+        $this->writeTokens($tokens);
     }
 
-    public function remove(): void
+    public function removeForOrigin(string $origin): void
     {
-        if (is_file($this->path()) && ! unlink($this->path())) {
-            throw new RuntimeException('Não foi possível remover a credencial do GitHub.');
-        }
+        $scope = $this->requiredScope($origin);
+        $tokens = $this->tokens();
+        unset($tokens[$scope]);
+        $this->writeTokens($tokens);
     }
 
     /** @return array<string, string> */
     public function environmentForOrigin(string $origin): array
     {
-        if (! $this->isGitHubHttpsOrigin($origin)) {
+        $scope = $this->scopeFromOrigin($origin);
+        if ($scope === null) {
             return [];
         }
-        $token = $this->token();
+
+        $tokens = $this->tokens();
+        $token = $tokens[$scope] ?? null;
         if ($token === null) {
             return [];
         }
@@ -63,25 +70,89 @@ class GitHubCredentialStore
         ];
     }
 
-    public function token(): ?string
+    /** @return array<string, string> */
+    private function tokens(): array
     {
-        if (! is_file($this->path())) {
+        if (! is_file($this->scopedPath())) {
+            return [];
+        }
+
+        try {
+            $tokens = json_decode(Crypt::decryptString((string) file_get_contents($this->scopedPath())), true, flags: JSON_THROW_ON_ERROR);
+            if (! is_array($tokens)) {
+                throw new RuntimeException('O armazenamento de credenciais do GitHub está inválido.');
+            }
+
+            return array_filter($tokens, fn (mixed $token): bool => is_string($token) && $token !== '');
+        } catch (RuntimeException $exception) {
+            throw $exception;
+        } catch (\Throwable) {
+            throw new RuntimeException('As credenciais salvas do GitHub não puderam ser lidas. Remova-as e informe novos tokens.');
+        }
+    }
+
+    /** @param array<string, string> $tokens */
+    private function writeTokens(array $tokens): void
+    {
+        $directory = dirname($this->scopedPath());
+        if (! is_dir($directory) && ! mkdir($directory, 0700, true) && ! is_dir($directory)) {
+            throw new RuntimeException('Não foi possível preparar o armazenamento seguro da credencial.');
+        }
+
+        $temporary = $this->scopedPath().'.tmp';
+        $payload = Crypt::encryptString(json_encode($tokens, JSON_THROW_ON_ERROR));
+        $written = file_put_contents($temporary, $payload, LOCK_EX);
+        if ($written === false || ! rename($temporary, $this->scopedPath())) {
+            @unlink($temporary);
+            throw new RuntimeException('Não foi possível salvar a credencial do GitHub.');
+        }
+    }
+
+    private function validateToken(string $token): void
+    {
+        if (! preg_match('/^[A-Za-z0-9_-]{20,500}$/', trim($token))) {
+            throw new RuntimeException('Informe um token do GitHub válido. Ele deve ter entre 20 e 500 caracteres, sem espaços.');
+        }
+    }
+
+    private function requiredScope(string $origin): string
+    {
+        $scope = $this->scopeFromOrigin($origin);
+        if ($scope === null) {
+            throw new RuntimeException('Este projeto não possui um repositório HTTPS do GitHub conectado. Conecte-o antes de guardar um token.');
+        }
+
+        return $scope;
+    }
+
+    private function scopeFromOrigin(string $origin): ?string
+    {
+        if (! preg_match('#^https://github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$#i', trim($origin), $matches)) {
+            return null;
+        }
+
+        return strtolower($matches[1].'/'.$matches[2]);
+    }
+
+    private function legacyToken(): ?string
+    {
+        if (! is_file($this->legacyPath())) {
             return null;
         }
 
         try {
-            return Crypt::decryptString((string) file_get_contents($this->path()));
+            return Crypt::decryptString((string) file_get_contents($this->legacyPath()));
         } catch (\Throwable) {
-            throw new RuntimeException('A credencial salva do GitHub não pôde ser lida. Remova-a e informe um novo token.');
+            throw new RuntimeException('A credencial legada do GitHub não pôde ser lida. Remova-a e informe um novo token.');
         }
     }
 
-    private function isGitHubHttpsOrigin(string $origin): bool
+    private function scopedPath(): string
     {
-        return (bool) preg_match('#^https://github\.com/#i', $origin);
+        return storage_path('app/private/github-tokens.enc');
     }
 
-    private function path(): string
+    private function legacyPath(): string
     {
         return storage_path('app/private/github-token.enc');
     }

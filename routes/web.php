@@ -10,12 +10,16 @@ Route::get('/', function () {
 });
 
 Route::prefix('api')->group(function (): void {
-    Route::get('/github-credential', [GitHubCredentialController::class, 'show']);
-    Route::put('/github-credential', [GitHubCredentialController::class, 'store']);
-    Route::delete('/github-credential', [GitHubCredentialController::class, 'destroy']);
+    Route::get('/projects/{project}/github-credential', [GitHubCredentialController::class, 'show']);
+    Route::put('/projects/{project}/github-credential', [GitHubCredentialController::class, 'store']);
+    Route::delete('/projects/{project}/github-credential', [GitHubCredentialController::class, 'destroy']);
     Route::get('/laravel-cloud-credential', [LaravelCloudController::class, 'credential']);
     Route::put('/laravel-cloud-credential', [LaravelCloudController::class, 'storeCredential']);
+    Route::delete('/laravel-cloud-credential', [LaravelCloudController::class, 'destroyCredential']);
     Route::post('/projects/{project}/laravel-cloud/verify', [LaravelCloudController::class, 'verify']);
+    Route::post('/projects/{project}/laravel-cloud/deploy-homologation', [LaravelCloudController::class, 'deployHomologation']);
+    Route::post('/projects/{project}/laravel-cloud/migration-status', [LaravelCloudController::class, 'migrationStatus']);
+    Route::post('/projects/{project}/laravel-cloud/deployment-status', [LaravelCloudController::class, 'deploymentStatus']);
     Route::get('/projects', [ProjectController::class, 'index']);
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::post('/projects/{project}/initialize', [ProjectController::class, 'initialize']);

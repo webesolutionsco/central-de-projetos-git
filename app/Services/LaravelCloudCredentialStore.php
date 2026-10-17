@@ -15,8 +15,8 @@ class LaravelCloudCredentialStore
     public function save(string $token): void
     {
         $token = trim($token);
-        if (! preg_match('/^[A-Za-z0-9_-]{20,500}$/', $token)) {
-            throw new RuntimeException('Informe um token do Laravel Cloud válido, sem espaços.');
+        if (! preg_match('/^\d{1,20}\|[A-Za-z0-9_-]{20,500}$/', $token)) {
+            throw new RuntimeException('Informe um token do Laravel Cloud válido no formato identificador|segredo, sem espaços.');
         }
 
         $directory = dirname($this->path());
@@ -41,6 +41,13 @@ class LaravelCloudCredentialStore
             return Crypt::decryptString((string) file_get_contents($this->path()));
         } catch (\Throwable) {
             throw new RuntimeException('A credencial Laravel Cloud não pôde ser lida. Remova-a e informe outra.');
+        }
+    }
+
+    public function remove(): void
+    {
+        if (is_file($this->path()) && ! unlink($this->path())) {
+            throw new RuntimeException('Não foi possível remover a credencial Laravel Cloud.');
         }
     }
 

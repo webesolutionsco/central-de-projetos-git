@@ -353,6 +353,7 @@ class LocalProjectReader
             'head' => null,
             'origin' => null,
             'identity_configured' => false,
+            'identity' => null,
             'has_changes' => false,
             'changes_count' => 0,
             'ahead' => null,
@@ -388,8 +389,18 @@ class LocalProjectReader
         }
 
         $base['is_git'] = true;
-        $base['identity_configured'] = $this->output($path, ['config', '--get', 'user.name']) !== null
-            && $this->output($path, ['config', '--get', 'user.email']) !== null;
+        $identityName = $this->output($path, ['config', '--get', 'user.name']);
+        $identityEmail = $this->output($path, ['config', '--get', 'user.email']);
+        $localIdentityName = $this->output($path, ['config', '--local', '--get', 'user.name']);
+        $localIdentityEmail = $this->output($path, ['config', '--local', '--get', 'user.email']);
+        $base['identity_configured'] = $identityName !== null && $identityEmail !== null;
+        if ($base['identity_configured']) {
+            $base['identity'] = [
+                'name' => $identityName,
+                'email' => $identityEmail,
+                'scope' => $localIdentityName !== null && $localIdentityEmail !== null ? 'project' : 'computer',
+            ];
+        }
         $statusOutput = $this->output($path, ['status']) ?? '';
         $base['technical_commands'] = $this->inspectionCommands($statusOutput);
         $base['branch'] = $this->output($path, ['branch', '--show-current']) ?: 'HEAD destacado';
@@ -576,12 +587,12 @@ class LocalProjectReader
 
     private function lastCommit(string $path): ?array
     {
-        $result = $this->git($path, ['log', '-1', '--format=%h%x1f%an%x1f%aI%x1f%s']);
+        $result = $this->git($path, ['log', '-1', '--format=%h%x1f%an%x1f%ae%x1f%aI%x1f%s']);
         if (! $result->successful() || trim($result->output()) === '') {
             return null;
         }
-        [$sha, $author, $date, $message] = array_pad(explode("\x1f", trim($result->output()), 4), 4, null);
-        return compact('sha', 'author', 'date', 'message');
+        [$sha, $author, $email, $date, $message] = array_pad(explode("\x1f", trim($result->output()), 5), 5, null);
+        return compact('sha', 'author', 'email', 'date', 'message');
     }
 
     private function authorizedPath(string $directory): string

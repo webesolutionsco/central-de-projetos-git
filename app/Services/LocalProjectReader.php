@@ -301,7 +301,7 @@ class LocalProjectReader
             }
             $result = $this->remoteProcess($path, $origin, ['push', '-u', 'origin', $branch], 45);
             if (! $result->successful()) {
-                throw new RuntimeException('O GitHub não confirmou o primeiro envio: '.trim($result->errorOutput()));
+                throw new RuntimeException($this->describePushFailure($result->errorOutput(), true));
             }
             return ['message' => 'Primeiro envio ao GitHub confirmado.', 'head' => $this->output($path, ['rev-parse', '--short', 'HEAD']), 'technical_commands' => [[
                 'command' => 'git push -u origin '.$branch,
@@ -317,7 +317,7 @@ class LocalProjectReader
         }
         $result = $this->remoteProcess($path, $origin, ['push'], 45);
         if (! $result->successful()) {
-            throw new RuntimeException('O GitHub não confirmou o envio: '.trim($result->errorOutput()));
+            throw new RuntimeException($this->describePushFailure($result->errorOutput()));
         }
         return ['message' => 'Envio ao GitHub confirmado.', 'head' => $this->output($path, ['rev-parse', '--short', 'HEAD']), 'technical_commands' => [[
             'command' => 'git push',
@@ -545,6 +545,21 @@ class LocalProjectReader
             throw new InvalidArgumentException('Este projeto não possui um remoto “origin” configurado.');
         }
         return $origin;
+    }
+
+    private function describePushFailure(string $error, bool $firstPush = false): string
+    {
+        $normalizedError = strtolower($error);
+
+        if (str_contains($normalizedError, '403') || str_contains($normalizedError, 'permission to ')) {
+            return 'O GitHub reconheceu o token, mas ele não tem permissão para enviar alterações neste repositório. Na aba “Configuração”, substitua-o por um token com acesso a este repositório e permissão “Contents: Read and write”; depois tente novamente.';
+        }
+
+        if (str_contains($normalizedError, 'terminal prompts have been disabled') || str_contains($normalizedError, 'could not read username')) {
+            return 'O GitHub pediu autenticação. Na aba “Configuração”, salve um token do GitHub com acesso a este repositório e permissão “Contents: Read and write”, depois tente novamente.';
+        }
+
+        return 'O GitHub não confirmou '.($firstPush ? 'o primeiro envio' : 'o envio').': '.trim($error);
     }
 
     private function inspectionCommands(string $statusOutput): array

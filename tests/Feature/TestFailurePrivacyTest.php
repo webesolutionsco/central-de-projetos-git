@@ -114,7 +114,7 @@ class TestFailurePrivacyTest extends TestCase
 
     public function test_safe_report_classifies_exception_and_retains_only_application_location(): void
     {
-        $failure = (new TestFailureReport)->failure('', '', null, "Illuminate\\Database\\QueryException: ".self::PRIVATE_VALUE."\napp/Services/MemberReader.php:37");
+        $failure = (new TestFailureReport)->failure('', '', null, 'Illuminate\\Database\\QueryException: '.self::PRIVATE_VALUE."\napp/Services/MemberReader.php:37");
 
         $this->assertPrivateDataAbsent(['failure' => $failure]);
         $this->assertSame('Illuminate\\Database\\QueryException', $failure['exception']);

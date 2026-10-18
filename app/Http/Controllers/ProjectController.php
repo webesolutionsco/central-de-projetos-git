@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CommitCheckJobs;
 use App\Services\LocalProjectReader;
 use App\Services\ProjectRegistry;
 use Illuminate\Http\JsonResponse;
@@ -206,7 +207,7 @@ class ProjectController extends Controller
         }
     }
 
-    public function runCommitChecks(Request $request, \App\Services\CommitCheckJobs $jobs, string $project): JsonResponse
+    public function runCommitChecks(Request $request, CommitCheckJobs $jobs, string $project): JsonResponse
     {
         $data = $request->validate([
             'sha' => ['required', 'string', 'max:64'],
@@ -222,7 +223,7 @@ class ProjectController extends Controller
         }
     }
 
-    public function commitCheckStatus(\App\Services\CommitCheckJobs $jobs, string $project, string $job): JsonResponse
+    public function commitCheckStatus(CommitCheckJobs $jobs, string $project, string $job): JsonResponse
     {
         try {
             return response()->json($jobs->read($job, $project))->header('Cache-Control', 'no-store');
@@ -231,12 +232,12 @@ class ProjectController extends Controller
         }
     }
 
-    public function latestCommitCheck(\App\Services\CommitCheckJobs $jobs, string $project): JsonResponse
+    public function latestCommitCheck(CommitCheckJobs $jobs, string $project): JsonResponse
     {
         return response()->json(['job' => $jobs->latest($project)])->header('Cache-Control', 'no-store');
     }
 
-    public function cancelCommitCheck(\App\Services\CommitCheckJobs $jobs, string $project, string $job): JsonResponse
+    public function cancelCommitCheck(CommitCheckJobs $jobs, string $project, string $job): JsonResponse
     {
         try {
             return response()->json($jobs->cancel($job, $project));

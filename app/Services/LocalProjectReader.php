@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Contracts\Process\ProcessResult;
+use Illuminate\Process\Exceptions\ProcessIdleTimedOutException;
 use Illuminate\Process\Exceptions\ProcessTimedOutException;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Process;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -16,7 +18,7 @@ class LocalProjectReader
 
     private ?\Closure $verificationCancelled = null;
 
-    private function verificationProcess(array $command, string $path, int $limit, string $stage, array $environment = [], ?int $idle = null): \Illuminate\Contracts\Process\ProcessResult
+    private function verificationProcess(array $command, string $path, int $limit, string $stage, array $environment = [], ?int $idle = null): ProcessResult
     {
         if ($this->verificationCancelled !== null && ($this->verificationCancelled)()) {
             throw new RuntimeException('Cancelamento solicitado. Nenhuma nova etapa foi iniciada.', 499);
@@ -73,9 +75,7 @@ class LocalProjectReader
         private readonly GitHubCredentialStore $credentials,
         private readonly ProjectRegistry $projects,
         private readonly TestFailureReport $testReports = new TestFailureReport,
-    )
-    {
-    }
+    ) {}
 
     public function projects(): array
     {
@@ -212,6 +212,7 @@ class LocalProjectReader
         }
 
         $remote = $this->connectRemote($id, (string) $response->json('clone_url'));
+
         return [
             'message' => 'Repositório criado no GitHub e conectado ao projeto local. Nenhum arquivo foi enviado.',
             'url' => (string) $response->json('html_url'),
@@ -240,6 +241,7 @@ class LocalProjectReader
         if (! $result->successful()) {
             throw new RuntimeException('Não foi possível preparar os arquivos: '.trim($result->errorOutput()));
         }
+
         return ['staged' => $requested, 'technical_commands' => [[
             'command' => 'git add -- '.implode(' ', array_map(fn ($file) => '"'.$file.'"', $requested)),
             'purpose' => 'Prepara somente os arquivos escolhidos para o próximo commit.',
@@ -266,6 +268,7 @@ class LocalProjectReader
         if (! $result->successful()) {
             throw new RuntimeException('O Git não confirmou o commit: '.trim($result->errorOutput()));
         }
+
         return ['sha' => $this->output($path, ['rev-parse', '--short', 'HEAD']), 'message' => $message, 'technical_commands' => [[
             'command' => 'git commit -m "'.$message.'"',
             'purpose' => 'Cria um registro local no histórico. Não envia nada à internet.',
@@ -328,6 +331,7 @@ class LocalProjectReader
             ->filter()
             ->map(function (string $line): array {
                 [$sha, $shortSha, $author, $date, $subject] = array_pad(explode("\x1f", $line, 5), 5, '');
+
                 return [...compact('sha', 'shortSha', 'author', 'date', 'subject'), 'patch_equivalent' => false, 'equivalent_commit' => null];
             })
             ->values()
@@ -339,6 +343,7 @@ class LocalProjectReader
             ->filter()
             ->map(function (string $line): array {
                 [$status, $path] = array_pad(explode("\t", $line, 2), 2, '');
+
                 return compact('status', 'path');
             })
             ->values()
@@ -497,7 +502,9 @@ class LocalProjectReader
         } catch (RuntimeException $exception) {
             $checks[] = [
                 'name' => 'Preparação isolada', 'status' => 'infrastructure_unavailable', 'passed' => false,
-                'cause' => match ($exception->getCode()) { 408 => 'preparation_timeout', 499 => 'cancelled', default => 'preparation_incomplete' }, 'output' => $exception->getMessage(),
+                'cause' => match ($exception->getCode()) {
+                    408 => 'preparation_timeout', 499 => 'cancelled', default => 'preparation_incomplete'
+                }, 'output' => $exception->getMessage(),
                 'explanation' => 'A verificação não concluiu. Consulte a saída parcial; nenhuma promoção foi liberada.',
             ];
         } finally {
@@ -519,24 +526,24 @@ class LocalProjectReader
         }
 
         return $this->testReports->result([
-                'commit' => substr($sha, 0, 7),
-                'cleanup' => $cleanup,
-                'elapsed_seconds' => round(hrtime(true) / 1e9 - $started, 2),
-                'checks' => $checks,
-                'technical_commands' => [[
-                    'command' => 'git worktree add --detach <área-isolada> '.$sha,
-                    'purpose' => 'Abre uma cópia temporária do commit escolhido, sem tocar nas alterações locais do projeto.',
-                ], [
-                    'command' => 'PHP CLI -d opcache.enable_cli=0 vendor/phpunit/phpunit/phpunit --debug --log-junit .central-test-results.xml'.($testTarget === null ? '' : ' <teste-selecionado>'),
-                    'purpose' => 'Executa a suíte de testes Laravel diretamente pelo PHPUnit, sem iniciar Apache nem herdar o cache CLI.',
-                ], [
-                    'command' => 'composer dump-autoload --no-scripts --no-plugins',
-                    'purpose' => 'Prepara uma cópia independente das dependências e aponta o carregamento de classes para o commit selecionado.',
-                ], [
-                    'command' => 'node node_modules/vite/bin/vite.js build (quando aplicável)',
-                    'purpose' => 'Compila a interface do commit na cópia isolada. Não reutiliza o build nem o .env do projeto de trabalho.',
-                ]],
-            ]);
+            'commit' => substr($sha, 0, 7),
+            'cleanup' => $cleanup,
+            'elapsed_seconds' => round(hrtime(true) / 1e9 - $started, 2),
+            'checks' => $checks,
+            'technical_commands' => [[
+                'command' => 'git worktree add --detach <área-isolada> '.$sha,
+                'purpose' => 'Abre uma cópia temporária do commit escolhido, sem tocar nas alterações locais do projeto.',
+            ], [
+                'command' => 'PHP CLI -d opcache.enable_cli=0 vendor/phpunit/phpunit/phpunit --debug --log-junit .central-test-results.xml'.($testTarget === null ? '' : ' <teste-selecionado>'),
+                'purpose' => 'Executa a suíte de testes Laravel diretamente pelo PHPUnit, sem iniciar Apache nem herdar o cache CLI.',
+            ], [
+                'command' => 'composer dump-autoload --no-scripts --no-plugins',
+                'purpose' => 'Prepara uma cópia independente das dependências e aponta o carregamento de classes para o commit selecionado.',
+            ], [
+                'command' => 'node node_modules/vite/bin/vite.js build (quando aplicável)',
+                'purpose' => 'Compila a interface do commit na cópia isolada. Não reutiliza o build nem o .env do projeto de trabalho.',
+            ]],
+        ]);
     }
 
     public function fetch(string $id): array
@@ -565,6 +572,7 @@ class LocalProjectReader
             'purpose' => 'Atualiza as referências do GitHub sem modificar arquivos locais.',
         ]);
         $details['technical_commands'] = $commands;
+
         return $details;
     }
 
@@ -630,6 +638,7 @@ class LocalProjectReader
             if (! $result->successful()) {
                 throw new RuntimeException($this->describePushFailure($result->errorOutput(), true));
             }
+
             return ['message' => 'Primeiro envio ao GitHub confirmado.', 'head' => $this->output($path, ['rev-parse', '--short', 'HEAD']), 'technical_commands' => [[
                 'command' => 'git push -u origin '.$branch,
                 'purpose' => 'Envia o primeiro histórico e define o destino remoto desta branch.',
@@ -646,6 +655,7 @@ class LocalProjectReader
         if (! $result->successful()) {
             throw new RuntimeException($this->describePushFailure($result->errorOutput()));
         }
+
         return ['message' => 'Envio ao GitHub confirmado.', 'head' => $this->output($path, ['rev-parse', '--short', 'HEAD']), 'technical_commands' => [[
             'command' => 'git push',
             'purpose' => 'Envia os commits locais para a branch remota configurada.',
@@ -698,11 +708,13 @@ class LocalProjectReader
 
         if (! $base['exists']) {
             $base['error'] = 'A pasta autorizada não foi encontrada.';
+
             return $base;
         }
 
         if (! $this->gitAvailable()) {
             $base['error'] = 'Git não encontrado pelo servidor PHP. Verifique CENTRAL_GIT_BINARY.';
+
             return $base;
         }
 
@@ -712,6 +724,7 @@ class LocalProjectReader
         if (! $this->isRepository($path)) {
             $base['can_initialize'] = true;
             $base['error'] = 'Esta pasta ainda não é a raiz de um repositório Git.';
+
             return $base;
         }
 
@@ -768,7 +781,7 @@ class LocalProjectReader
             $xy = substr($record, 0, 2);
             $file = substr($record, 3);
             if (in_array($xy[0] ?? '', ['R', 'C'], true) && isset($records[$i + 1])) {
-                $file .= ' ← '. $records[++$i];
+                $file .= ' ← '.$records[++$i];
             }
             $gitPath = substr($record, 3);
             $item = [
@@ -779,6 +792,7 @@ class LocalProjectReader
             ];
             if ($xy === '??') {
                 $changes['untracked'][] = $item;
+
                 continue;
             }
             if (($xy[0] ?? ' ') !== ' ') {
@@ -811,6 +825,7 @@ class LocalProjectReader
                 $items[$change['code']."\0".$change['path']] = true;
             }
         }
+
         return count($items);
     }
 
@@ -851,6 +866,7 @@ class LocalProjectReader
                 $files[$change['git_path']] = true;
             }
         }
+
         return $files;
     }
 
@@ -865,12 +881,14 @@ class LocalProjectReader
                 }
             }
         }
+
         return array_values($migrations);
     }
 
     private function isSensitive(string $file): bool
     {
         $name = strtolower(basename(str_replace('\\', '/', $file)));
+
         return $name === '.env' || (str_starts_with($name, '.env.') && $name !== '.env.example')
             || str_ends_with($name, '.pem') || str_ends_with($name, '.key')
             || in_array($name, ['id_rsa', 'id_ed25519', 'credentials.json'], true);
@@ -882,6 +900,7 @@ class LocalProjectReader
         if ($origin === null) {
             throw new InvalidArgumentException('Este projeto não possui um remoto “origin” configurado.');
         }
+
         return $origin;
     }
 
@@ -906,7 +925,7 @@ class LocalProjectReader
     }
 
     /** @param list<array{sha: string, shortSha: string, author: string, date: string, subject: string, patch_equivalent: bool, equivalent_commit: ?array{sha: string, short_sha: string}}> $commits
-     *  @return list<array{sha: string, shortSha: string, author: string, date: string, subject: string, patch_equivalent: bool, equivalent_commit: ?array{sha: string, short_sha: string}}>
+     * @return list<array{sha: string, shortSha: string, author: string, date: string, subject: string, patch_equivalent: bool, equivalent_commit: ?array{sha: string, short_sha: string}}>
      */
     private function markPatchEquivalentCommits(string $path, string $baseReference, string $sourceReference, array $commits): array
     {
@@ -1111,13 +1130,14 @@ class LocalProjectReader
         try {
             $result = $this->verificationProcess($command, $path, $timeout, $name, $environment, $idleTimeout === null ? null : min($idleTimeout, $timeout));
         } catch (ProcessTimedOutException $exception) {
-            $idle = $exception instanceof \Illuminate\Process\Exceptions\ProcessIdleTimedOutException;
+            $idle = $exception instanceof ProcessIdleTimedOutException;
             $partialOutput = trim($exception->result->output()."\n".$exception->result->errorOutput());
             $progress = '';
             if (preg_match('/Test Suite Loaded \((\d+) tests?\)/', $partialOutput, $total)) {
                 $completed = preg_match_all('/^Test Finished \(/m', $partialOutput);
                 $progress = ' Foram concluídos '.$completed.' de '.$total[1].' testes; a suíte não foi aprovada integralmente.';
             }
+
             return [
                 'name' => $name,
                 'status' => 'infrastructure_unavailable',
@@ -1196,6 +1216,7 @@ class LocalProjectReader
             return null;
         }
         [$sha, $author, $email, $date, $message] = array_pad(explode("\x1f", trim($result->output()), 5), 5, null);
+
         return compact('sha', 'author', 'email', 'date', 'message');
     }
 
@@ -1213,6 +1234,7 @@ class LocalProjectReader
         if ($resolved !== false && ! str_starts_with(strtolower($resolved), strtolower($root.DIRECTORY_SEPARATOR))) {
             throw new RuntimeException('O caminho está fora da raiz autorizada.');
         }
+
         return $resolved ?: $candidate;
     }
 
@@ -1246,12 +1268,14 @@ class LocalProjectReader
     private function gitAvailable(): bool
     {
         $result = Process::timeout(3)->run([(string) config('central.git_binary', 'git'), '--version']);
+
         return $result->successful();
     }
 
     private function output(string $path, array $arguments): ?string
     {
         $result = $this->git($path, $arguments);
+
         return $result->successful() ? trim($result->output()) ?: null : null;
     }
 }

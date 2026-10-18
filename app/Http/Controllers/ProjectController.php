@@ -165,4 +165,83 @@ class ProjectController extends Controller
             return response()->json(['message' => $exception->getMessage()], 409);
         }
     }
+
+    public function remoteBranches(LocalProjectReader $reader, string $project): JsonResponse
+    {
+        try {
+            return response()->json($reader->remoteBranches($project));
+        } catch (InvalidArgumentException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 409);
+        }
+    }
+
+    public function compareRemoteBranches(Request $request, LocalProjectReader $reader, string $project): JsonResponse
+    {
+        $data = $request->validate([
+            'base_branch' => ['required', 'string', 'max:200'],
+            'source_branch' => ['required', 'string', 'max:200'],
+        ]);
+
+        try {
+            return response()->json($reader->compareRemoteBranches($project, $data['base_branch'], $data['source_branch']));
+        } catch (InvalidArgumentException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 409);
+        }
+    }
+
+    public function commitDiff(Request $request, LocalProjectReader $reader, string $project): JsonResponse
+    {
+        $data = $request->validate(['sha' => ['required', 'string', 'max:64']]);
+
+        try {
+            return response()->json($reader->commitDiff($project, $data['sha']));
+        } catch (InvalidArgumentException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 409);
+        }
+    }
+
+    public function runCommitChecks(Request $request, \App\Services\CommitCheckJobs $jobs, string $project): JsonResponse
+    {
+        $data = $request->validate([
+            'sha' => ['required', 'string', 'max:64'],
+            'test_target' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        try {
+            return response()->json($jobs->start($project, $data['sha'], $data['test_target'] ?? null), 202);
+        } catch (InvalidArgumentException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 422);
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 409);
+        }
+    }
+
+    public function commitCheckStatus(\App\Services\CommitCheckJobs $jobs, string $project, string $job): JsonResponse
+    {
+        try {
+            return response()->json($jobs->read($job, $project))->header('Cache-Control', 'no-store');
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 404);
+        }
+    }
+
+    public function latestCommitCheck(\App\Services\CommitCheckJobs $jobs, string $project): JsonResponse
+    {
+        return response()->json(['job' => $jobs->latest($project)])->header('Cache-Control', 'no-store');
+    }
+
+    public function cancelCommitCheck(\App\Services\CommitCheckJobs $jobs, string $project, string $job): JsonResponse
+    {
+        try {
+            return response()->json($jobs->cancel($job, $project));
+        } catch (RuntimeException $exception) {
+            return response()->json(['message' => $exception->getMessage()], 404);
+        }
+    }
 }

@@ -6,7 +6,10 @@ use App\Http\Controllers\LaravelCloudController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('central');
+    return response()
+        ->view('central')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        ->header('Pragma', 'no-cache');
 });
 
 Route::prefix('api')->group(function (): void {
@@ -28,6 +31,13 @@ Route::prefix('api')->group(function (): void {
     Route::post('/projects/{project}/github-repository', [ProjectController::class, 'createGitHubRepository']);
     Route::post('/projects/{project}/integrate-remote-history', [ProjectController::class, 'integrateRemoteHistory']);
     Route::get('/projects/{project}', [ProjectController::class, 'show']);
+    Route::get('/projects/{project}/remote-branches', [ProjectController::class, 'remoteBranches']);
+    Route::post('/projects/{project}/compare-remote-branches', [ProjectController::class, 'compareRemoteBranches']);
+    Route::post('/projects/{project}/commit-diff', [ProjectController::class, 'commitDiff']);
+    Route::post('/projects/{project}/run-commit-checks', [ProjectController::class, 'runCommitChecks']);
+    Route::get('/projects/{project}/commit-checks/latest', [ProjectController::class, 'latestCommitCheck']);
+    Route::get('/projects/{project}/commit-checks/{job}', [ProjectController::class, 'commitCheckStatus']);
+    Route::post('/projects/{project}/commit-checks/{job}/cancel', [ProjectController::class, 'cancelCommitCheck']);
     Route::post('/projects/{project}/stage', [ProjectController::class, 'stage']);
     Route::post('/projects/{project}/commit', [ProjectController::class, 'commit']);
     Route::post('/projects/{project}/fetch', [ProjectController::class, 'fetch']);

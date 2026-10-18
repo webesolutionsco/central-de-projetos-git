@@ -10,6 +10,9 @@
         * { box-sizing:border-box } body { font:15px/1.5 Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);margin:0 }.wrap{max-width:1080px;margin:32px auto;padding:15px} header{display:flex;justify-content:space-between;gap:16px;align-items:center} h1{font-size:26px;margin:0}h1 span{color:var(--blue)}p,small{color:var(--muted)}.tag,.badge{display:inline-flex;align-items:center;gap:6px;border-radius:22px;padding:7px 10px;font-size:12px;font-weight:700;background:#eaf1ff;color:#2458bd}.tag{background:#e4f7ee;color:#16764b}.app{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 15px 40px #14284b12;overflow:hidden}nav{display:flex;overflow:auto;border-bottom:1px solid #e3e9f2}nav button{padding:18px;border:0;background:#fff;color:#65758d;cursor:pointer;white-space:nowrap;font-weight:700;font:inherit}nav button.active{color:var(--blue);border-bottom:3px solid var(--blue)}section{display:none;padding:25px}section.active{display:block}h2{margin:0 0 5px;font-size:21px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin:20px 0}.card{border:1px solid #e2e9f2;border-radius:13px;padding:17px}.card strong{display:block;font-size:21px;margin:9px 0}.status{display:inline-block;padding:6px 9px;background:#fff3dc;color:var(--warn);border-radius:20px;font-size:12px;font-weight:700}.ok{background:#e3f8ec;color:var(--good)}.blue{background:#eaf1ff;color:#2458bd}.danger{background:#fff0ef;color:var(--danger)}select,textarea,input:not([type=checkbox]){width:100%;padding:12px;border:1px solid #dce4ef;border-radius:9px;background:#fff;font:inherit;margin:10px 0}.action{background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 16px;cursor:pointer;margin:6px 6px 6px 0;font-weight:700;font:inherit}.secondary{background:#eaf1ff;color:#2458bd}.action:disabled{opacity:.5;cursor:not-allowed}.hint{background:#f0f5ff;padding:15px;border-radius:11px;margin:18px 0;color:#426293;font-size:13px}.item{display:flex;gap:11px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #edf1f6}.item:last-child{border:0}.item span{flex:1}.item small{font-size:12px}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0}.flow .card{text-align:center;background:#f9fbfe}.emoji{font-size:26px}.branch{display:flex;align-items:center;gap:12px;border:1px solid #e2e9f2;border-radius:12px;padding:15px;margin:12px 0}.branch div{flex:1}.branch small{display:block;margin-top:4px}.terminal{margin:18px 25px 0;background:#0b1220;color:#d8e4ff;border-radius:12px;overflow:hidden;border:1px solid #1f2b42}.terminal-head{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:#111c31;font-size:12px;font-weight:700}.terminal-dot{color:#77e6a5}.terminal-body{margin:0;padding:12px 14px;min-height:86px;max-height:175px;overflow:auto;font:12px/1.65 Consolas,"Courier New",monospace}.terminal-command{color:#86efac}.terminal-note{color:#9db4d9;margin:0 0 9px 17px;font:12px/1.4 Inter,Arial,sans-serif}.foot{text-align:center;font-size:12px;color:#8a96a8;margin:18px}.loader{display:inline-block;width:15px;height:15px;border:2px solid #c9d7f5;border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px}.hidden{display:none}.detail{font-size:12px;color:var(--muted);word-break:break-word}.count{font-variant-numeric:tabular-nums}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:650px){.grid,.flow{grid-template-columns:1fr}section{padding:17px}.terminal{margin:12px 17px 0}header{align-items:flex-start;flex-direction:column}.wrap{margin:12px auto}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
         .project-selection{display:grid;grid-template-columns:minmax(240px,320px) minmax(0,1fr);gap:13px;align-items:end;margin:16px 0 22px}.project-selection label,.add-project-fields label{display:block}.project-selection select,.project-selection .hint{margin:10px 0 0}.project-selection .hint{min-height:50px;display:flex;align-items:center}.add-project-fields{display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,1fr);gap:23px}.add-project-fields select,.add-project-fields input{margin:10px 0 0}.add-project-actions{display:flex;align-items:center;flex-wrap:wrap;gap:2px;margin-top:10px}.add-project-actions .action{margin:6px 6px 6px 0}@media(max-width:650px){.project-selection,.add-project-fields{grid-template-columns:1fr}}
     </style>
+    <style>
+        .version-compare-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.comparison-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.comparison-box{padding:12px;border:1px solid var(--line);border-radius:10px;background:#f9fbfe}.comparison-box strong{font-size:16px}.commit-choice{width:100%;text-align:left;border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px;margin:5px 0;cursor:pointer;color:var(--ink)}.commit-choice:hover{border-color:var(--blue);background:#f5f8ff}.commit-diff{max-height:420px;overflow:auto;white-space:pre-wrap;background:#0b1220;color:#d8e4ff;border-radius:10px;padding:12px;font:12px/1.55 Consolas,"Courier New",monospace}@media(max-width:650px){.version-compare-fields,.comparison-grid{grid-template-columns:1fr}}
+    </style>
 </head>
 <body>
 <main class="wrap">
@@ -36,7 +39,7 @@
             <button class="action" id="commit" disabled title="Cria um registro local com os arquivos preparados. Ainda não envia nada ao GitHub.">① Salvar no histórico (Commit)</button><button class="action secondary" id="push" disabled title="Envia ao GitHub somente os commits locais que já foram revisados e estão prontos.">② Enviar ao GitHub (Push)</button>
             <div class="hint" id="commitFeedback">🔒 Arquivos sensíveis, como <code>.env</code>, chaves e credenciais, são bloqueados. Push será habilitado após a integração GitHub.</div>
         </section>
-        <section><h2>Versões e caminhos (Branches)</h2><p>As informações abaixo aguardam a integração real com o GitHub. A branch local atual aparece na primeira aba.</p><div class="branch">⌘ <div><b id="branchDetail">Nenhum projeto selecionado</b><small>Em uso neste computador — dado local confirmado quando o Git estiver disponível.</small></div><span class="status blue">Local</span></div><div class="hint">💡 “main” costuma ser a linha principal; “base” é normalmente o destino de um Pull Request. Nenhuma branch será trocada, criada ou removida nesta fase.</div></section>
+        <section><h2>Versões e caminhos (Branches)</h2><p>Compare versões já consultadas do GitHub antes de escolher uma entrega. Esta etapa só lê dados: não troca branch, não cria commit e não altera arquivos.</p><div class="branch">⌘ <div><b id="branchDetail">Nenhum projeto selecionado</b><small>Em uso neste computador — dado local confirmado quando o Git estiver disponível.</small></div><span class="status blue">Local</span></div><div class="card"><h3>Comparar entregas</h3><p>Escolha de onde vem a alteração e para qual versão ela seria levada. Exemplo: <code>main</code> → <code>homologacao</code>.</p><div class="version-compare-fields"><label for="compareSource"><b>Versão com a alteração (origem)</b><select id="compareSource" disabled></select></label><label for="compareBase"><b>Versão que receberia a alteração (destino)</b><select id="compareBase" disabled></select></label></div><button class="action secondary" id="compareBranches" disabled title="Compara commits e arquivos entre as versões, sem alterar nenhuma delas.">Comparar versões</button><p id="branchComparisonStatus" class="detail">Escolha um projeto para listar as versões consultadas do GitHub.</p><div id="branchComparison" class="detail"></div></div><div class="hint">💡 Uma promoção por commit específico (cherry-pick) será liberada somente após a comparação, os testes e uma confirmação. Assim, alterações locais e entregas não relacionadas não entram junto.</div></section>
         <section><h2>Onde está cada atualização?</h2><p>GitHub é acompanhado pelo Git local. A homologação pode ser consultada e publicada quando o ambiente estiver configurado; produção permanece bloqueada nesta etapa.</p><div class="flow"><div class="card"><div class="emoji">💻</div><strong>Computador</strong><small id="localSummary">Aguardando leitura</small></div><div class="card"><div class="emoji">☁️</div><strong>GitHub</strong><small>Via Git local</small></div><div class="card"><div class="emoji">🧪</div><strong>Homologação</strong><small>Consulta e publicação confirmada</small></div><div class="card"><div class="emoji">🚀</div><strong>Produção</strong><small>Bloqueada nesta etapa</small></div></div><div class="card"><b>Atualizações de banco (Migrations)</b><p id="migrations">Escolha um projeto para identificar arquivos de migration alterados.</p><small>Execução na homologação e produção: <b>não automática</b>. A Central não executa migrations durante a publicação desta etapa.</small></div><div class="card" id="githubSettingsCard"><h3>Conexão segura com GitHub</h3><p id="githubCredentialStatus">Verificando configuração…</p><label for="githubToken"><b>Token de acesso pessoal</b></label><input id="githubToken" type="password" autocomplete="off" spellcheck="false" placeholder="Cole um token do GitHub" title="O token será criptografado no servidor. Ele não será mostrado novamente nem enviado ao terminal."><p><button class="action" id="saveGitHubToken" title="Guarda o token criptografado para autenticar apenas fetch e push em repositórios HTTPS do GitHub.">Salvar token com segurança</button><button class="action secondary hidden" id="changeGitHubToken">Trocar token</button><button class="action secondary" id="removeGitHubToken" title="Apaga o token guardado pela Central. A consulta e o envio voltarão a depender das credenciais do Git instalado.">Remover token</button></p><small>Use um token de acesso pessoal com acesso somente aos repositórios necessários. Para consultar e enviar commits, use “Contents: Read and write” (somente consulta: “Contents: Read”). Para criar repositórios pela Central, o token também precisa de “Administration: Write”. O token não aparece novamente depois de salvo.</small></div><div class="hint">A publicação confirma a branch e o estado da homologação antes de iniciar o deploy. Produção e migrations não são alteradas por este fluxo.</div></section>
         <section id="configurationSection"><h2>⚙ Configuração</h2><p>Integrações e credenciais configuradas uma única vez. A rotina diária fica nas quatro primeiras abas.</p></section>
     </div><div class="foot">Fase 1: leitura local segura • dados exibidos diretamente do Git local</div>
@@ -332,5 +335,204 @@ setInterval(() => {
         el('localSummary').textContent = value;
     }
 }, 250);
+</script>
+<script>
+const compareSource = el('compareSource');
+const compareBase = el('compareBase');
+const compareBranchesButton = el('compareBranches');
+const branchComparisonStatus = el('branchComparisonStatus');
+const branchComparison = el('branchComparison');
+let branchProjectId = null;
+
+function branchOptions(branches, preferred) {
+    return branches.map(branch => `<option value="${escapeHtml(branch.name)}" ${branch.name === preferred ? 'selected' : ''}>${escapeHtml(branch.name)} · ${escapeHtml(branch.sha)} — ${escapeHtml(branch.subject)}</option>`).join('');
+}
+
+async function loadRemoteBranches() {
+    if (! state.current?.origin) {
+        compareSource.innerHTML = '';
+        compareBase.innerHTML = '';
+        compareSource.disabled = true;
+        compareBase.disabled = true;
+        compareBranchesButton.disabled = true;
+        branchComparisonStatus.textContent = 'Conecte este projeto ao GitHub antes de comparar versões.';
+        return;
+    }
+
+    compareBranchesButton.disabled = true;
+    branchComparisonStatus.textContent = 'Lendo as versões já consultadas do GitHub…';
+    try {
+        const data = await request(`${apiBase}/projects/${encodeURIComponent(state.current.id)}/remote-branches`);
+        const branches = data.branches || [];
+        const source = branches.some(branch => branch.name === 'main') ? 'main' : branches[0]?.name;
+        const base = branches.some(branch => branch.name === 'homologacao') ? 'homologacao' : branches.find(branch => branch.name !== source)?.name;
+        compareSource.innerHTML = branchOptions(branches, source);
+        compareBase.innerHTML = branchOptions(branches, base);
+        compareSource.disabled = branches.length < 2;
+        compareBase.disabled = branches.length < 2;
+        compareBranchesButton.disabled = branches.length < 2;
+        branchComparisonStatus.textContent = branches.length < 2
+            ? 'São necessárias pelo menos duas versões remotas para fazer uma comparação.'
+            : `${branches.length} versão(ões) do GitHub disponível(is). Escolha e compare antes de qualquer promoção.`;
+        showTerminal(data.technical_commands, 'Versões remotas lidas');
+    } catch (error) {
+        compareSource.disabled = true;
+        compareBase.disabled = true;
+        compareBranchesButton.disabled = true;
+        branchComparisonStatus.textContent = `⚠️ ${error.message}`;
+    }
+}
+
+function renderBranchComparison(data) {
+    const commits = data.commits.length
+        ? data.commits.map(commit => {
+            const alreadyPromoted = commit.patch_equivalent
+                ? `<br><span class="status ok">✓ Já está no destino${commit.equivalent_commit ? ` como ${escapeHtml(commit.equivalent_commit.short_sha)}` : ' por alteração equivalente'} (cherry-pick equivalente). Não promova novamente.</span>`
+                : '';
+
+            return `<button type="button" class="commit-choice" data-inspect-commit="${escapeHtml(commit.sha)}"><code>${escapeHtml(commit.shortSha)}</code> — ${escapeHtml(commit.subject)}<br><small>${escapeHtml(commit.author)} · ${escapeHtml(commit.date)}</small>${alreadyPromoted}</button>`;
+        }).join('')
+        : '<p>✅ Nenhum commit exclusivo da versão de origem.</p>';
+    const files = data.files.length
+        ? `<ul>${data.files.map(file => `<li><code>${escapeHtml(file.status)}</code> ${escapeHtml(file.path)}</li>`).join('')}</ul>`
+        : '<p>✅ Nenhum arquivo diferente.</p>';
+    const pending = data.source_only - data.equivalent_count;
+    const divergence = data.base_only
+        ? `<p class="hint">⚠️ Há ${data.base_only} commit(s) apenas no destino: existe divergência real entre as versões. Isso não confirma conflito, mas exige revisão antes de qualquer promoção.</p>`
+        : '';
+    branchComparison.innerHTML = `<div class="comparison-grid"><div class="comparison-box"><strong>Destino: ${escapeHtml(data.base.name)}</strong><p><code>${escapeHtml(data.base.sha.slice(0, 7))}</code><br>${data.base_only} commit(s) que só existem no destino.</p></div><div class="comparison-box"><strong>Origem: ${escapeHtml(data.source.name)}</strong><p><code>${escapeHtml(data.source.sha.slice(0, 7))}</code><br>${data.source_only} commit(s) encontrados; ${pending} ainda precisam de análise.</p></div></div>${data.equivalent_count ? `<p class="hint">✅ ${data.equivalent_count} correção(ões) já estão no destino com outro SHA por cherry-pick. Não promova essas correções novamente.</p>` : ''}${divergence}<h3>Commits analisados antes da promoção</h3>${commits}<h3>Arquivos afetados pela comparação</h3>${files}<details><summary>Resumo técnico das diferenças</summary><pre class="commit-diff">${escapeHtml(data.stat)}</pre></details><p class="hint">🔒 A promoção continua bloqueada nesta etapa. Primeiro escolha um commit acima e leia sua diferença; nenhuma alteração local será usada nesta comparação.</p>`;
+}
+
+async function compareRemoteBranches() {
+    if (! state.current) {
+        return;
+    }
+    compareBranchesButton.disabled = true;
+    branchComparisonStatus.textContent = 'Comparando versões sem alterar arquivos…';
+    branchComparison.innerHTML = '';
+    try {
+        const data = await request(`${apiBase}/projects/${encodeURIComponent(state.current.id)}/compare-remote-branches`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken()},
+            body: JSON.stringify({base_branch: compareBase.value, source_branch: compareSource.value}),
+        });
+        const pending = data.source_only - data.equivalent_count;
+        branchComparisonStatus.textContent = data.equivalent_count
+            ? `✅ Comparação concluída: ${data.equivalent_count} correção(ões) já estão em ${data.base.name} por cherry-pick; ${pending} commit(s) ainda precisam de análise.`
+            : `✅ Comparação concluída: ${data.source_only} commit(s) disponíveis para análise de ${data.source.name} para ${data.base.name}.`;
+        renderBranchComparison(data);
+        showTerminal(data.technical_commands, 'Versões comparadas');
+    } catch (error) {
+        branchComparisonStatus.textContent = `⚠️ ${error.message}`;
+    } finally {
+        compareBranchesButton.disabled = false;
+    }
+}
+
+async function inspectCommitDiff(sha) {
+    if (! state.current) {
+        return;
+    }
+    branchComparisonStatus.textContent = 'Abrindo as diferenças do commit selecionado…';
+    try {
+        const data = await request(`${apiBase}/projects/${encodeURIComponent(state.current.id)}/commit-diff`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken()},
+            body: JSON.stringify({sha}),
+        });
+        branchComparisonStatus.textContent = `✅ Diferença do commit ${data.commit.short_sha} aberta somente para leitura.`;
+        branchComparison.insertAdjacentHTML('beforeend', `<h3>Linhas alteradas: <code>${escapeHtml(data.commit.short_sha)}</code></h3><p>${escapeHtml(data.commit.subject)}</p><label for="testTarget"><b>Teste opcional</b><input id="testTarget" maxlength="255" placeholder="Ex.: WebeIgrejaMemberTest ou tests/Feature/WebeIgrejaMemberTest.php"></label><button type="button" class="action secondary" data-run-checks="${escapeHtml(data.commit.sha)}" title="Executa testes em uma cópia temporária deste commit. Suas alterações locais não entram no teste.">Executar verificações deste commit</button><p class="detail">Deixe em branco para a suíte completa. Para reexecutar só um caso, informe um arquivo em tests/Feature ou tests/Unit, ou uma classe de teste. Tudo ocorre na cópia descartável, em segundo plano.</p><pre class="commit-diff">${escapeHtml(data.diff)}</pre>`);
+        showTerminal(data.technical_commands, 'Diferença do commit lida');
+    } catch (error) {
+        branchComparisonStatus.textContent = `⚠️ ${error.message}`;
+    }
+}
+
+compareBranchesButton.addEventListener('click', compareRemoteBranches);
+let commitChecksRunning = false;
+let checkJob = null;
+let checkingJobStatus = false;
+let renderedJobVersion = '';
+const checkJobPanel = document.createElement('div');
+branchComparisonStatus.insertAdjacentElement('afterend', checkJobPanel);
+async function checkJobRequest(url, options = {}) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+        const response = await fetch(url, {...options, signal: controller.signal, headers: {Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken()}});
+        const data = await response.json();
+        if (!response.ok) { throw new Error(data.message || `Falha HTTP ${response.status}`); }
+        return data;
+    } finally { clearTimeout(timeout); }
+}
+function renderSafeFailures(failures) {
+    return (failures || []).map(failure => `<dl class="comparison-box"><dt>Teste</dt><dd>${escapeHtml(failure.test)}</dd><dt>Arquivo de teste</dt><dd>${escapeHtml(failure.file || 'Não informado')}</dd><dt>Linha</dt><dd>${escapeHtml(failure.line ?? 'Não informada')}</dd><dt>Categoria</dt><dd>${escapeHtml(failure.category || 'test_failure')}</dd><dt>Exceção</dt><dd>${escapeHtml(failure.exception || 'Não identificada')}</dd><dt>Código da aplicação</dt><dd>${escapeHtml(failure.application_file || 'Não informado')}${failure.application_line ? `:${escapeHtml(failure.application_line)}` : ''}</dd><dt>Mensagem da falha</dt><dd>${escapeHtml(failure.message)}</dd></dl>`).join('');
+}
+function renderCheckJob(job) {
+    checkJob = job;
+    commitChecksRunning = job && ['queued', 'running'].includes(job.status);
+    branchComparison.querySelectorAll('[data-run-checks]').forEach(button => button.disabled = !!commitChecksRunning);
+    if (!job) { checkJobPanel.innerHTML = ''; renderedJobVersion = ''; return; }
+    const version = `${job.id}:${job.updated_at}:${job.status}:${job.cancel_requested}:${job.heartbeat_delayed}`;
+    if (version === renderedJobVersion) { return; }
+    renderedJobVersion = version;
+    const opened = !!checkJobPanel.querySelector('details[open]');
+    const progress = job.total_tests ? `${job.completed_tests} de ${job.total_tests} testes concluídos${job.failed_tests !== undefined ? `; ${job.failed_tests} falhas e ${job.errored_tests || 0} erros` : ''}` : 'Preparando a execução';
+    const runningText = job.heartbeat_delayed ? '⚠️ Executor sem sinal recente. O resultado e a limpeza ainda não estão confirmados.' : `${job.stage} — ${progress}.`;
+    const rows = (job.result?.checks || []).map(check => `<div class="comparison-box"><strong>${check.passed ? '✅' : '⚠️'} ${escapeHtml(check.name)}</strong><p>${escapeHtml(check.explanation)}</p>${check.test_summary ? `<p>${check.test_summary.tests} testes; ${check.test_summary.failures} falhas, ${check.test_summary.errors} erros, ${check.test_summary.skipped} ignorados.</p>` : ''}${check.failures?.length ? `<details><summary>Ver resumo técnico seguro</summary>${renderSafeFailures(check.failures)}</details>` : ''}</div>`).join('');
+    checkJobPanel.innerHTML = `<div class="comparison-box"><h3>Verificação do commit ${escapeHtml(job.sha.slice(0, 7))}</h3><p>${escapeHtml(commitChecksRunning ? runningText : job.message)}</p><p>${job.elapsed_seconds} s decorridos. Limite de segurança: 30 minutos, mais até 20 s para limpeza. Você pode trocar de aba ou reabrir a Central.</p>${job.current_test && commitChecksRunning ? `<small>Teste atual: ${escapeHtml(job.current_test)}</small>` : ''}${commitChecksRunning ? `<p><button type="button" class="action secondary" data-cancel-check ${job.cancel_requested ? 'disabled' : ''}>${job.cancel_requested ? 'Cancelamento solicitado; aguardando limpeza…' : 'Cancelar verificação'}</button></p><details ${opened ? 'open' : ''}><summary>Falhas identificadas até agora</summary>${renderSafeFailures(job.live_failures) || '<p>Nenhuma falha estruturada registrada até agora.</p>'}</details>` : ''}<p><small>Por segurança, HTML, dados de teste, tokens e saída bruta dos processos não são exibidos nem guardados neste relatório. Mensagens de falha são resumidas.</small></p>${rows}${job.result?.cleanup ? `<p>${job.result.cleanup.successful ? '✅' : '⚠️'} ${escapeHtml(job.result.cleanup.message)}</p>` : ''}<p>${job.status === 'passed' ? '✅ Verificações aprovadas. Nenhuma publicação foi executada.' : 'A promoção permanece bloqueada enquanto não houver aprovação integral.'}</p></div>`;
+}
+async function refreshCheckJob() {
+    if (checkingJobStatus || !state.current) { return; }
+    checkingJobStatus = true;
+    const project = state.current.id;
+    try {
+        const data = await checkJobRequest(`${apiBase}/projects/${encodeURIComponent(project)}/commit-checks/latest`);
+        if (state.current?.id === project) { renderCheckJob(data.job); }
+    } catch (error) {
+        if (state.current?.id === project && checkJob) {
+            branchComparisonStatus.textContent = '⚠️ Não foi possível consultar o progresso. A execução pode continuar no servidor; tentando novamente…';
+        }
+    } finally { checkingJobStatus = false; }
+}
+checkJobPanel.addEventListener('click', async event => {
+    if (!event.target.matches('[data-cancel-check]') || !checkJob) { return; }
+    const job = checkJob;
+    event.target.disabled = true;
+    try {
+        const data = await checkJobRequest(`${apiBase}/projects/${encodeURIComponent(job.project)}/commit-checks/${job.id}/cancel`, {method: 'POST'});
+        if (state.current?.id === job.project) { renderCheckJob(data); }
+    } catch (error) { branchComparisonStatus.textContent = `⚠️ Cancelamento não confirmado: ${error.message}`; event.target.disabled = false; }
+});
+setInterval(refreshCheckJob, 2000);
+async function runCommitChecks(sha) {
+    if (commitChecksRunning || ! state.current || ! confirm('Executar testes em uma cópia temporária do commit selecionado? Nenhuma alteração local será usada.')) {
+        return;
+    }
+    commitChecksRunning = true;
+    const project = state.current.id;
+    const buttons = [...branchComparison.querySelectorAll('[data-run-checks]')];
+    buttons.forEach(button => button.disabled = true);
+    branchComparisonStatus.textContent = 'Iniciando verificação em segundo plano…';
+    try {
+        const testTarget = branchComparison.querySelector('#testTarget')?.value.trim() || null;
+        const job = await checkJobRequest(`${apiBase}/projects/${encodeURIComponent(project)}/run-commit-checks`, {method: 'POST', body: JSON.stringify({sha, test_target: testTarget})});
+        if (state.current?.id === project) { renderCheckJob(job); branchComparisonStatus.textContent = job.sha.startsWith(sha) ? 'Execução registrada. Acompanhe abaixo; nenhuma publicação será feita.' : 'Já existe uma verificação ativa de outro commit deste projeto. Acompanhe ou cancele antes de iniciar outra.'; }
+    } catch (error) {
+        branchComparisonStatus.textContent = `⚠️ ${error.message}. Consultando se a execução foi registrada…`;
+    } finally {
+        await refreshCheckJob();
+        buttons.forEach(button => button.disabled = !!commitChecksRunning);
+    }
+}
+branchComparison.addEventListener('click', event => { const inspectSha = event.target.dataset.inspectCommit; const checkSha = event.target.dataset.runChecks; if (inspectSha) { inspectCommitDiff(inspectSha); } if (checkSha) { runCommitChecks(checkSha); } });
+setInterval(() => {
+    if (state.current?.id && state.current.id !== branchProjectId) {
+        branchProjectId = state.current.id;
+        renderCheckJob(null);
+        refreshCheckJob();
+        loadRemoteBranches();
+    }
+}, 200);
 </script>
 </body></html>
